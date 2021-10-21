@@ -1,0 +1,5 @@
+Uber Simulation Data
+Taxi Account 4 Went Bankrupt At Balance: 0.0 On Day: 335
+Taxi Account 2 Went Bankrupt At Balance: 0.0 On Day: 354
+Taxi Account 3 Went Bankrupt At Balance: 0.0 On Day: 388
+Taxi Account 1 Went Bankrupt At Balance: 0.0 On Day: 493
