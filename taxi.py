@@ -360,7 +360,7 @@ class Taxi:
 
         else:
 
-            #Reference to A Star Algorithm from Week 2 gridagents_solution.py
+            # Reference to A Star Algorithm from Week 2 gridagents_solution.py
 
             path = []
             if origin not in self._map:
@@ -368,30 +368,31 @@ class Taxi:
             if origin == destination:
                 return [origin]
 
-            hCost = lambda x, y: float(numpy.linalg.norm(x[0]-y[0])) + float(numpy.linalg.norm(x[1]-y[1])) #Create euclidean distance heuristic
+            hCost = lambda x, y: float(numpy.linalg.norm(x[0] - y[0])) + float(
+                numpy.linalg.norm(x[1] - y[1]))  # Create euclidean distance heuristic
 
             explored = set()
             expanded = {hCost(origin, destination): {origin: [origin]}}
-            #print(f"Expanded: {expanded}")
-            #print(f"Explored: {explored}")
+            # print(f"Expanded: {expanded}")
+            # print(f"Explored: {explored}")
             while len(expanded) > 0:
                 lowestCost = min(expanded.keys())
                 nextTarget = expanded[lowestCost]
                 if destination in nextTarget:
-                    #print("REACHED DEST")
-                    #print(f"Destination: {destination} Target: {nextTarget[destination]}")
-                    #print(type(expanded))
-                    #print(type(nextTarget))
-                    #print(nextTarget.values())
+                    # print("REACHED DEST")
+                    # print(f"Destination: {destination} Target: {nextTarget[destination]}")
+                    # print(type(expanded))
+                    # print(type(nextTarget))
+                    # print(nextTarget.values())
                     for targ in nextTarget[destination]:
                         path.append(targ)
 
-                    #print(path)
+                    # print(path)
 
                     return path
                 nextPos = nextTarget.popitem()
-                #print(f"Starting Pos: {origin}, End Pos: {destination}")
-                #print(nextPos)
+                # print(f"Starting Pos: {origin}, End Pos: {destination}")
+                # print(nextPos)
                 while len(nextTarget) > 0 and nextPos[0] in explored:
                     nextPos = nextTarget.popitem()
                 if len(nextTarget) == 0:
@@ -402,8 +403,9 @@ class Taxi:
                     while len(expansionTargets) > 0:
                         expansionTarget = expansionTargets.pop()
                         xTuple, yTuple = expansionTarget[1]
-                        estimatedDistance = lowestCost - hCost(nextPos[0], destination) + xTuple + yTuple + hCost(expansionTarget[0],destination)
-                        #print(f"ESTIMATED DISTANCE: {estimatedDistance}")
+                        estimatedDistance = lowestCost - hCost(nextPos[0], destination) + xTuple + yTuple + hCost(
+                            expansionTarget[0], destination)
+                        # print(f"ESTIMATED DISTANCE: {estimatedDistance}")
                         if estimatedDistance in expanded:
                             expanded[estimatedDistance][expansionTarget[0]] = nextPos[1] + [expansionTarget[0]]
                         else:

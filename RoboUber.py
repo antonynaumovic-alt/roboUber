@@ -24,7 +24,7 @@ runTime = 1440 * days
 displaySize = (1280, 960)
 trafficOn = False
 
-uberSpeedTime = 0.1
+uberSpeedTime = 0.001
 
 # play around with these parameters if you want, to see how they affect the results.
 # (but keep the original settings so you can return to something more-or-less 'sensible)

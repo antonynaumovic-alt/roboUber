@@ -33,4 +33,5 @@ def plotTaxiAccount(accounts, taxiAmount, dispatcherAccounts):
     plt.ylabel("Account Balance")
     plt.axhline(y=0, color='black', linestyle=':')
     plt.legend(legendNames)
+    plt.savefig('taxiStats.png', bbox_inches='tight')
     plt.show()
