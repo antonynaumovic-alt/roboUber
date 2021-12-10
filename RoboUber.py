@@ -12,7 +12,7 @@ import dataplot
 
 # create objects for RoboUber
 
-# TODO
+# TODO Experiment with Settings
 # experiment with parameter settings. worldX and worldY should not need to be
 # changed, but others are fair game!
 # basic parameters
@@ -22,7 +22,7 @@ days = 3
 runTime = 1440 * days
 # you can change the DisplaySize to be bigger if you want larger-size objects on-screen
 displaySize = (1280, 960)
-trafficOn = False
+trafficOn = True
 
 uberSpeedTime = 0.001
 

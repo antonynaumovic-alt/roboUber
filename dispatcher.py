@@ -199,14 +199,19 @@ class Dispatcher:
 
     # TODO - improve costing
     def _costFare(self, fare):
+
         timeToDestination = self._parent.travelTime(self._parent.getNode(fare.origin[0], fare.origin[1]),
                                                     self._parent.getNode(fare.destination[0], fare.destination[1]))
+
+
+
+        #print(f"TIME: {timeToDestination}")
+
         # if the world is gridlocked, a flat fare applies.
         if timeToDestination < 0:
             return 150
         return (25 + timeToDestination) / 0.9
 
-    # TODO
     # this method decides which taxi to allocate to a given fare. The algorithm here is not a fair allocation
     # scheme: taxis can (and do!) get starved for fares, simply because they happen to be far away from the
     # action. You should be able to do better than that using some form of CSP solver (this is just a suggestion,
@@ -239,16 +244,16 @@ class Dispatcher:
                         # print(currentLocNode)
                         if self._taxis[tId]._passenger == None:
                             taxiRepo[tId][0] = "Available"
-                            distanceScore = self._parent.travelTime(currentLocNode, self._parent.getNode(destination[0],destination[1]))
+                            distanceScore = abs(self._parent.travelTime(currentLocNode, self._parent.getNode(destination[0],destination[1])))
                             distanceScore += 1
                             taxiRepo[tId][1] = 100 / (distanceScore)
                         else:
                             taxiRepo[tId][0] = "Unavailable"
                             currentDistNode = self._parent.getNode(self._taxis[tId]._path[-1][0], self._taxis[tId]._path[-1][1])
-                            distanceScore = self._parent.travelTime(currentLocNode, currentDistNode)
+                            distanceScore = abs(self._parent.travelTime(currentLocNode, currentDistNode))
                             distanceScore += 1
                             taxiRepo[tId][1] = 100 / (distanceScore)
-                    print(taxiRepo)
+                    #print(taxiRepo)
                 #print(f"Keys: {list(taxiRepo.keys())}")
                 lowestVal = taxiRepo[(list(taxiRepo.keys())[0])][1]
                 lowestId = 0
@@ -265,77 +270,7 @@ class Dispatcher:
                 self._fareBoard[origin][destination][time].taxi = lowestId
                 self._parent.allocateFare(origin, self._taxis[lowestId])
 
-                '''
-                    for t in self._taxis:
-                        currentLocNode = self._parent.getNode(t.currentLocation[0], t.currentLocation[1])
-                        # print(currentLocNode)
-                        if t._passenger == None:
-                            taxiRepo[taxiIdx][0] = "Available"
-                            distanceScore = self._parent.travelTime(currentLocNode, self._parent.getNode(destination[0],
-                                                                                                         destination[
-                                                                                                             1]))
-                        else:
-                            taxiRepo[taxiIdx][0] = "Unavailable"
-                            currentDistNode = self._parent.getNode(t._path[-1][0], t._path[-1][1])
-                            distanceScore = self._parent.travelTime(currentLocNode, currentDistNode)
 
-                        distanceScore += 1
-                        taxiRepo[taxiIdx][0] = 100 / distanceScore
-                        #print(taxiRepo[taxiIdx])
-                    print("NEXT")
-
-                print("NEXT2")
-
-            print(taxiRepo)
-
-                #lowest = min(taxiRepo, key=taxiRepo.get)
-
-                #lowest = taxiRepo.items()
-                #print(min(taxiRepo, key=taxiRepo.get))
-
-                    # print(currentTaxis)
-                #lowestList = numpy.array(currentTaxis)
-                #lowestList = lowestList[numpy.lexsort((lowestList[:, 1], lowestList[:, 2]))]
-
-                #for n in range(len(currentTaxis[1])):
-                #    pass
-                # print(lowestList)
-            '''
-            '''
-                for taxiIdx in self._fareBoard[origin][destination][time].bidders:
-                    if len(self._taxis) > taxiIdx:
-                        currentTaxis[taxiIdx][0] = taxiIdx
-                        print(currentTaxis[taxiIdx][0])
-                        currentTaxis[taxiIdx][1] = 1
-                        print(currentTaxis[taxiIdx][1])
-                        currentTaxis[taxiIdx][2] = 0
-                        print(currentTaxis[taxiIdx][2])
-                        #print("CUR: ",currentTaxis)
-                print(f"{currentTaxis}")
-                print("NEXT")
-                if len(currentTaxis) > 0:
-                    taxiIter = 0
-                    for t in self._taxis:
-                        currentLocNode = self._parent.getNode(t.currentLocation[0], t.currentLocation[1])
-                        #print(currentLocNode)
-                        if t._passenger == None:
-                            currentTaxis[taxiIter][1] = 1
-                            distanceScore = self._parent.travelTime(currentLocNode, self._parent.getNode(destination[0], destination[1]))
-                        else:
-                            currentDistNode = self._parent.getNode(t._path[-1][0], t._path[-1][1])
-                            distanceScore = self._parent.travelTime(currentLocNode, currentDistNode)
-
-                        distanceScore += 1
-                        currentTaxis[taxiIter][2] = 100/distanceScore
-                        taxiIter += 1
-                #print(currentTaxis)
-                lowestList = numpy.array(currentTaxis)
-                lowestList = lowestList[numpy.lexsort((lowestList[:,1], lowestList[:,2]))]
-
-                for n in range(len(currentTaxis[1])):
-                    pass
-                #print(lowestList)
-            '''
 
 
         else:

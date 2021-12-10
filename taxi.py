@@ -324,7 +324,7 @@ class Taxi:
     ''' HERE IS THE PART THAT YOU NEED TO MODIFY
     '''
 
-    # TODO
+    # TODO Add Probabilistic
     # this function should build your route and fill the _path list for each new
     # journey. Below is a naive depth-first search implementation. You should be able
     # to do much better than this!
@@ -421,7 +421,8 @@ class Taxi:
     # a hint that maybe some form of CSP solver with automated reasoning might be a good way of implementing this. But
     # other methodologies could work well. For best results you will almost certainly need to use probabilistic reasoning.
     def _bidOnFare(self, time, origin, destination, price):
-        NoCurrentPassengers = self._passenger is None
+        '''
+
         NoAllocatedFares = len([fare for fare in self._availableFares.values() if fare.allocated]) == 0
         TimeToOrigin = self._world.travelTime(self._loc, self._world.getNode(origin[0], origin[1]))
         TimeToDestination = self._world.travelTime(self._world.getNode(origin[0], origin[1]),
@@ -440,3 +441,98 @@ class Taxi:
         Worthwhile = PriceBetterThanCost and NotCurrentlyBooked
         Bid = CloseEnough and Worthwhile
         return Bid
+        '''
+
+        fareAmountToConsider = 2
+
+        bidChance = 100
+        dist = 0
+        multiplier = 1
+        NoCurrentPassengers = self._passenger is None
+
+        AllocatedFares = [fare for fare in self._availableFares.values() if fare.allocated]
+        TimeToOrigin = self._world.travelTime(self._loc, self._world.getNode(origin[0], origin[1]))
+        TimeToDestination = self._world.travelTime(self._world.getNode(origin[0], origin[1]),
+                                                   self._world.getNode(destination[1], destination[1]))
+        FiniteTimeToOrigin = TimeToOrigin > 0
+        CanAffordToDrive = self._account > TimeToOrigin
+        FiniteTimeToDestination = TimeToDestination > 0
+        FareExpiryInFuture = self._maxFareWait > self._world.simTime - time
+        EnoughTimeToReachFare = self._maxFareWait - self._world.simTime + time > TimeToOrigin
+        FairPriceToDestination = price > TimeToDestination
+        PriceBetterThanCost = FairPriceToDestination and FiniteTimeToDestination
+        SufficientDrivingTime = FiniteTimeToOrigin and EnoughTimeToReachFare
+        WillArriveOnTime = FareExpiryInFuture and SufficientDrivingTime
+        CloseEnough = CanAffordToDrive and WillArriveOnTime and PriceBetterThanCost
+
+
+        '''
+        CSP Factors:
+        Potential Traffic per each node.
+        Current Distance Away.
+        Current Allocations.
+        Can get to Node.
+        Current Node Traffic.
+        Destination Node Traffic.
+        Origin Node Traffic.
+        Potential for closer customer
+        '''
+
+
+
+        dist = TimeToOrigin
+        if not NoCurrentPassengers:
+            curNode = self._world.getNode(self._path[-1][0], self._path[-1][1])
+            customerNode = self._world.getNode(origin[0], origin[1])
+            destNode = self._world.getNode(destination[0], destination[1])
+            if len(AllocatedFares) > fareAmountToConsider:
+                bidChance = 0
+            else:
+                for i in self._availableFares.items():
+                    if i[1].allocated:
+                        currentCustomerNode = self._world.getNode(i[1].destination[0],i[1].destination[1])
+                if len(AllocatedFares) == 1:
+                    #print(type(curNode), type(currentCustomerNode))
+                    dist = self._world.travelTime(curNode, currentCustomerNode)
+                    dist += self._world.travelTime(currentCustomerNode, customerNode)
+                else:
+                    currentCustomerNode = self._world.getNode(AllocatedFares[1].destination[0], AllocatedFares[1].destination[1])
+                    dist = self._world.travelTime(self._loc, curNode)
+                    dist += self._world.travelTime(curNode, currentCustomerNode)
+
+                potCost = price + ((-dist) + self._world.travelTime(customerNode, destNode))
+                #print(potCost)
+                bidChance -= 5 * destNode.capacity * multiplier
+                bidChance -= 5 * customerNode.capacity * multiplier
+                bidChance -= 100 / math.exp(potCost) * multiplier
+
+        else:
+            multiplier = 0.5
+        if self._account > dist and bidChance > 0:
+            approxNodes = abs(round((dist - self._world.averageDistance) / self._world.averageDistance))
+            trafficChance = self._world.averageTraffic*approxNodes
+            bidChance -= 10 * trafficChance * multiplier
+            bidChance -= 5 * self._loc.capacity * multiplier
+        else:
+            bidChance = 0
+
+        if self._account < TimeToOrigin or not CloseEnough or self._account < dist:
+            bidChance = 0
+
+        print(f"Bid Chance: {bidChance}% Multiplier: {multiplier}, Viable: {CloseEnough}")
+        bidChance /= 100
+        bidChance = numpy.clip(bidChance, 0, 1)
+        if bidChance > 0:
+            bid = numpy.random.choice([True,False], size=1, p=[bidChance, 1-bidChance])
+            print(bid)
+        else:
+            bid = False
+        return bid
+
+
+
+
+
+
+
+

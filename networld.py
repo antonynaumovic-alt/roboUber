@@ -495,11 +495,30 @@ class NetWorld:
         self._dispatcher = None
         if jctNodes is not None:
             self.addNodes(jctNodes)
+            xCoords = []
+            yCoords = []
+            avTraffic = 0
+            for junc in jctNodes:
+                xCoords.append(junc.x)
+                yCoords.append(junc.y)
+                avTraffic += junc.tSrc
+            self._averageTraffic = avTraffic/len(jctNodes)
+
+            distance = 0
+            for i in range(len(xCoords)):
+                x1 = xCoords[i]
+                y1 = yCoords[i]
+                for ii in range(i + 1, len(xCoords)):
+                    x2 = xCoords[ii] - x1
+                    y2 = yCoords[ii] - y1
+                    distance += math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            self._distance = 2 * distance / (len(xCoords) * (len(xCoords) - 1))
         if edges is not None:
             self.addEdges(edges, interpolateNodes)
         # self.eventQ = NetEventQueue()
         # the simulation clock.
         self._time = 0
+
 
     # properties
 
@@ -513,6 +532,14 @@ class NetWorld:
     @property
     def size(self):
         return len(self._net)
+
+    @property
+    def averageDistance(self):
+        return self._distance
+
+    @property
+    def averageTraffic(self):
+        return self._averageTraffic
 
     # __________________________________________________________________________________________________________
     # methods to build the graph and place agents in it
@@ -805,6 +832,7 @@ class NetWorld:
                 return 0
         # a travel time of -1 indicates an indefinite wait into the future. We are, in other words,
         # not getting anywhere anytime soon.
+        #print(origin.traffic, origin.maxTraffic, destination.traffic, destination.maxTraffic)
         if origin.traffic == origin.maxTraffic or destination.traffic == destination.maxTraffic:
             return -1
         # all other destinations take finite time to reach.
